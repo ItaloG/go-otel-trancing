@@ -1,0 +1,6 @@
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "06634000"
+}
