@@ -1,10 +1,49 @@
 version: '3'
 services:
-  app:
+  otel-agent:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config", "/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./.docker/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "55680:55680"
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    depends_on:
+      - otel-agent
+
+  go-app1:
     build:
-      context: .
+      context: weather-api/
       dockerfile: Dockerfile
     environment:
-      - WEATHER_TOKEN=YOUR_TOKEN
+      - SERVER_PORT=:8080
+      - WEATHER_API=http://go-app2:8081/
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - SERVICE_NAME=weather-input-service
     ports:
       - "8080:8080"
+    depends_on:
+      - go-app2
+
+  go-app2:
+    build:
+      context: weather-searcher/
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_PORT=:8081
+      - LOCATION_API=http://viacep.com.br/ws/
+      - WEATHER_TOKEN=ffc0bf9a91504a27abe01823241701
+      - WEATHER_API=http://api.weatherapi.com/v1/current.json?q=
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - SERVICE_NAME=weather-searcher-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - otel-agent
+      - zipkin
+      

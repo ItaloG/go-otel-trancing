@@ -33,10 +33,9 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(otelhttp.NewMiddleware("OTEL HTTP Middleware" + viper.GetString("SERVICE_NAME")))
+	r.Use(otelhttp.NewMiddleware("OTEL HTTP Middleware" + "-" + viper.GetString("SERVICE_NAME")))
 
-	searchWeatherService := services.NewSearchWeatherService(viper.GetString("WEATHER_API"))
-	// searchWeatherService := services.NewSearchWeatherService("http://172.23.128.46:8081/")
+	searchWeatherService := services.NewSearchWeatherService(viper.GetString("WEATHER_API"), tracer)
 	cepValidator := validators.NewCepValidator()
 	searchWeatherUsecase := usecases.NewSearchWeatherUseCase(cepValidator, searchWeatherService)
 	searchWaterHandler := handlers.NewHttpSearchWeatherHandler(*searchWeatherUsecase, tracer)

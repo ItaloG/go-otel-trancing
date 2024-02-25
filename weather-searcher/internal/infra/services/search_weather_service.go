@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	services_protocols "github.com/ItaloG/go-weather-searcher/internal/protocols/services"
 	"go.opentelemetry.io/otel"
@@ -60,15 +61,21 @@ type WeatherApiResponse struct {
 type SearchWeatherService struct {
 	ClientUrl    string
 	WeatherToken string
+	OTELTracer   trace.Tracer
 }
 
-func NewSearchWeatherService(clientUrl, weatherToken string) *SearchWeatherService {
-	return &SearchWeatherService{ClientUrl: clientUrl, WeatherToken: weatherToken}
+func NewSearchWeatherService(clientUrl, weatherToken string, tracer trace.Tracer) *SearchWeatherService {
+	return &SearchWeatherService{ClientUrl: clientUrl, WeatherToken: weatherToken, OTELTracer: tracer}
 }
 
 var ErrWeatherNotFound = errors.New("can not found weather")
 
 func (sw *SearchWeatherService) Search(ctx context.Context, location string, OTELSpan trace.Span) (*services_protocols.Weather, error) {
+	ctx, span := sw.OTELTracer.Start(ctx, "request to weather API")
+	defer span.End()
+
+	startTime := time.Now()
+
 	formattedLocation := strings.Replace(location, " ", "_", -1)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", sw.ClientUrl+formattedLocation+"&key="+sw.WeatherToken, nil)
@@ -102,6 +109,9 @@ func (sw *SearchWeatherService) Search(ctx context.Context, location string, OTE
 	}
 
 	tempK := float64(weatherResponse.Current.TempC) + 273
+
+	requestDuration := time.Since(startTime)
+	span.SetAttributes(attribute.Float64("weather API request duration", requestDuration.Seconds()))
 
 	return &services_protocols.Weather{
 		TempC: float64(weatherResponse.Current.TempC),

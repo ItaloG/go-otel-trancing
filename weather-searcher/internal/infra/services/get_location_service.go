@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	services_protocols "github.com/ItaloG/go-weather-searcher/internal/protocols/services"
 	"go.opentelemetry.io/otel"
@@ -29,16 +30,22 @@ type ViaCEP struct {
 }
 
 type GetLocationService struct {
-	ClientUrl string
+	ClientUrl  string
+	OTELTracer trace.Tracer
 }
 
-func NewGetLocationService(clientUrl string) *GetLocationService {
-	return &GetLocationService{ClientUrl: clientUrl}
+func NewGetLocationService(clientUrl string, tracer trace.Tracer) *GetLocationService {
+	return &GetLocationService{ClientUrl: clientUrl, OTELTracer: tracer}
 }
 
 var ErrLocationNotFound = errors.New("can not found location")
 
 func (s *GetLocationService) GetLocation(ctx context.Context, cep string, OTELSpan trace.Span) (*services_protocols.Location, error) {
+	ctx, span := s.OTELTracer.Start(ctx, "request to viacep")
+	defer span.End()
+
+	startTime := time.Now()
+
 	req, err := http.NewRequestWithContext(ctx, "GET", s.ClientUrl+cep+"/json/", nil)
 	if err != nil {
 		OTELSpan.SetAttributes(attribute.String("HTTP Error", err.Error()))
@@ -71,6 +78,9 @@ func (s *GetLocationService) GetLocation(ctx context.Context, cep string, OTELSp
 		OTELSpan.SetAttributes(attribute.String("Vicep Error", "Cep inválido"))
 		return nil, ErrLocationNotFound
 	}
+
+	requestDuration := time.Since(startTime)
+	span.SetAttributes(attribute.Float64("viacep request duration", requestDuration.Seconds()))
 
 	return &services_protocols.Location{Localidade: c.Localidade}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	services_protocols "github.com/ItaloG/go-weather-api/internal/data/protocols/services"
 	"go.opentelemetry.io/otel"
@@ -15,16 +16,22 @@ import (
 )
 
 type SearchWeatherService struct {
-	ClientUrl string
+	ClientUrl  string
+	OTELTracer trace.Tracer
 }
 
-func NewSearchWeatherService(clientUrl string) *SearchWeatherService {
-	return &SearchWeatherService{ClientUrl: clientUrl}
+func NewSearchWeatherService(clientUrl string, tracer trace.Tracer) *SearchWeatherService {
+	return &SearchWeatherService{ClientUrl: clientUrl, OTELTracer: tracer}
 }
 
 var ErrWeatherNotFound = errors.New("can not found weather")
 
 func (sw *SearchWeatherService) Search(ctx context.Context, cep string, OTELSpan trace.Span) (*services_protocols.Weather, error) {
+	ctx, span := sw.OTELTracer.Start(ctx, "request to weather searcher microservice")
+	defer span.End()
+
+	startTime := time.Now()
+
 	req, err := http.NewRequestWithContext(ctx, "GET", sw.ClientUrl+cep, nil)
 	if err != nil {
 		OTELSpan.SetAttributes(attribute.String("HTTP Error", err.Error()))
@@ -53,6 +60,9 @@ func (sw *SearchWeatherService) Search(ctx context.Context, cep string, OTELSpan
 		OTELSpan.SetAttributes(attribute.String("JSON Unmarshal Error", err.Error()))
 		return &services_protocols.Weather{}, err
 	}
+
+	requestDuration := time.Since(startTime)
+	span.SetAttributes(attribute.Float64("weather searcher request duration", requestDuration.Seconds()))
 
 	return weather, nil
 }

@@ -28,7 +28,7 @@ func (h *HttpSearchWeatherHandler) Search(w http.ResponseWriter, r *http.Request
 	carrier := propagation.HeaderCarrier(r.Header)
 	ctx := r.Context()
 	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
-	ctx, span := h.OTELTracer.Start(ctx, "validate cep")
+	ctx, span := h.OTELTracer.Start(ctx, "input handler")
 	defer span.End()
 
 	var input usecases.SearchWeatherInputDTO
