@@ -62,8 +62,8 @@ type SearchWeatherService struct {
 	WeatherToken string
 }
 
-func NewSearchWeatherService(clientUrl string) *SearchWeatherService {
-	return &SearchWeatherService{ClientUrl: clientUrl}
+func NewSearchWeatherService(clientUrl, weatherToken string) *SearchWeatherService {
+	return &SearchWeatherService{ClientUrl: clientUrl, WeatherToken: weatherToken}
 }
 
 var ErrWeatherNotFound = errors.New("can not found weather")

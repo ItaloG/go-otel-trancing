@@ -33,7 +33,7 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(otelhttp.NewMiddleware("OTEL HTTP Middleware"))
+	r.Use(otelhttp.NewMiddleware("OTEL HTTP Middleware" + viper.GetString("SERVICE_NAME")))
 
 	searchWeatherService := services.NewSearchWeatherService(viper.GetString("WEATHER_API"))
 	// searchWeatherService := services.NewSearchWeatherService("http://172.23.128.46:8081/")
@@ -43,7 +43,7 @@ func main() {
 
 	r.Post("/weather", searchWaterHandler.Search)
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(viper.GetString("SERVER_PORT"), r)
 }
 
 func initOpenTelemetry(zipkinUrl, serviceName string) {

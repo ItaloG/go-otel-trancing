@@ -1,6 +1,51 @@
+### SERVIÇO A
+### SUCCESS
 POST http://localhost:8080/weather
 Content-Type: application/json
 
 {
-    "cep": "06634000"
+    "cep": "80010000"
 }
+
+### INVALID ZIPCODE
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": 123465
+}
+
+### INVALID ZIPCODE
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "52544"
+}
+
+### INVALID ZIPCODE
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": ""
+}
+
+### INVALID ZIPCODE
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "abc"
+}
+
+### SERVIÇO B
+### SUCCESS
+GET http://localhost:8081/80010000 HTTP/1.1
+
+### INVALID ZIPCODE
+GET http://localhost:8081/123465 HTTP/1.1
+
+### ZIPCODE NOT FOUND
+GET http://localhost:8081/52544517 HTTP/1.1
+
