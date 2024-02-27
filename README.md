@@ -3,7 +3,9 @@ Este projeto é uma API para buscar informações climáticas de cidades com bas
 
 ### Pré-requisitos
 Certifique-se de ter o [Docker](https://www.docker.com/) instalado em sua máquina.
- 
+
+**Obs**: A ferramenta zipkin fornece a funcionalidade de exportação de `tracing` em formato json, caso você tenha algum problema em usar o projeto por favor me encaminhe o/os trancings para que eu possa analisar.
+
 ### Executando os Serviços 
 Para iniciar os serviços, execute o seguinte comando no terminal:
 
