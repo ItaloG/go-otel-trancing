@@ -17,7 +17,7 @@ func (v *CepValidator) Validate(cep string) error {
 	if cep == "" {
 		return errors.New("empty zipcode")
 	}
-	isValid, err := regexp.MatchString(`\d{8}`, cep)
+	isValid, err := regexp.MatchString(`^\d{8}$`, cep)
 	if err != nil || !isValid {
 		return errors.New("invalid zipcode format")
 	}
