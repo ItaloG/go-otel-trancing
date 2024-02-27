@@ -27,7 +27,7 @@ func TestShouldReturn_InvalidCepError_When_CepValidatorReturns_An_Error(t *testi
 	assert.Equal(t, err, ErrInvalidCep)
 }
 
-func TestShouldReturn_WeatherNotFoundError_When_SearchWeatherServiceReturns_An_Error(t *testing.T) {
+func TestShouldReturn_ZipCodeNotFoundError_When_SearchWeatherServiceReturns_An_Error(t *testing.T) {
 	cepValidatorMock := &validators_mocks.CepValidatorMock{}
 	searchWeatherServiceMock := &services_mocks.SearchWeatherServiceMock{}
 
@@ -41,7 +41,7 @@ func TestShouldReturn_WeatherNotFoundError_When_SearchWeatherServiceReturns_An_E
 	output, err := uc.Execute(input)
 
 	assert.Nil(t, output)
-	assert.Equal(t, err, ErrWeatherNotFound)
+	assert.Equal(t, err, ErrZipCodeNotFound)
 }
 
 func TestShouldReturn_Weather_OnSuccess(t *testing.T) {

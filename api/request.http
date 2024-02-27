@@ -7,12 +7,20 @@ Content-Type: application/json
     "cep": "80010000"
 }
 
-### INVALID ZIPCODE
+### ZIPCODE MUST BE STRING
 POST http://localhost:8080/weather
 Content-Type: application/json
 
 {
     "cep": 123465
+}
+
+### INVALID ZIPCODE
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "011530000"
 }
 
 ### INVALID ZIPCODE
@@ -31,6 +39,14 @@ Content-Type: application/json
     "cep": ""
 }
 
+### ZIP CODE NOT FOUND
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "00000000"
+}
+
 ### INVALID ZIPCODE
 POST http://localhost:8080/weather
 Content-Type: application/json
@@ -45,6 +61,12 @@ GET http://localhost:8081/80010000 HTTP/1.1
 
 ### INVALID ZIPCODE
 GET http://localhost:8081/123465 HTTP/1.1
+
+### INVALID ZIPCODE
+GET http://localhost:8081/011530000 HTTP/1.1
+
+### ZIP CODE NOT FOUND
+GET http://localhost:8081/00000000 HTTP/1.1
 
 ### ZIPCODE NOT FOUND
 GET http://localhost:8081/52544517 HTTP/1.1

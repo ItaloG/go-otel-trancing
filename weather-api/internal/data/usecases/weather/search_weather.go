@@ -36,7 +36,7 @@ func NewSearchWeatherUseCase(cepValidator validators_protocols.CepValidator, sea
 }
 
 var ErrInvalidCep = errors.New("invalid zipcode")
-var ErrWeatherNotFound = errors.New("can not found weather")
+var ErrZipCodeNotFound = errors.New("can not find zipcode")
 
 func (uc *SearchWeatherUseCase) Execute(input SearchWeatherInputDTO) (*SearchWeatherOutputDTO, error) {
 	err := uc.CepValidator.Validate(input.Cep)
@@ -47,7 +47,7 @@ func (uc *SearchWeatherUseCase) Execute(input SearchWeatherInputDTO) (*SearchWea
 
 	weather, err := uc.SearchWeatherService.Search(input.Ctx, input.Cep, input.OTELSpan)
 	if err != nil {
-		return nil, ErrWeatherNotFound
+		return nil, ErrZipCodeNotFound
 	}
 
 	return &SearchWeatherOutputDTO{

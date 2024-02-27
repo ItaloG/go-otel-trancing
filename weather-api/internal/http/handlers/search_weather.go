@@ -56,11 +56,11 @@ func (h *HttpSearchWeatherHandler) Search(w http.ResponseWriter, r *http.Request
 		json.NewEncoder(w).Encode("invalid zipcode")
 		return
 	}
-	if err == usecases.ErrWeatherNotFound {
-		span.SetAttributes(attribute.String("Response", fmt.Sprintf("Status: %d, Message: %s", http.StatusNotFound, "weather not found")))
+	if err == usecases.ErrZipCodeNotFound {
+		span.SetAttributes(attribute.String("Response", fmt.Sprintf("Status: %d, Message: %s", http.StatusNotFound, "can not find zipcode")))
 
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode("weather not found")
+		json.NewEncoder(w).Encode("can not find zipcode")
 		return
 	}
 
