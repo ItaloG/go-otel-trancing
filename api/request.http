@@ -7,6 +7,22 @@ Content-Type: application/json
     "cep": "80010000"
 }
 
+###
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "01153000"
+}
+
+###
+POST http://localhost:8080/weather
+Content-Type: application/json
+
+{
+    "cep": "29600000"
+}
+
 ### ZIPCODE MUST BE STRING
 POST http://localhost:8080/weather
 Content-Type: application/json

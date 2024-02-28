@@ -47,6 +47,8 @@ func (s *GetLocationService) GetLocation(ctx context.Context, cep string, OTELSp
 	startTime := time.Now()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", s.ClientUrl+cep+"/json/", nil)
+	OTELSpan.SetAttributes(attribute.String("HTTP Request", s.ClientUrl+cep+"/json/"))
+
 	if err != nil {
 		OTELSpan.SetAttributes(attribute.String("HTTP Error", err.Error()))
 		return nil, err
@@ -81,6 +83,12 @@ func (s *GetLocationService) GetLocation(ctx context.Context, cep string, OTELSp
 
 	requestDuration := time.Since(startTime)
 	span.SetAttributes(attribute.Float64("viacep request duration", requestDuration.Seconds()))
+
+	viacepResponse, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	OTELSpan.SetAttributes(attribute.String("HTTP Response", string(viacepResponse)))
 
 	return &services_protocols.Location{Localidade: c.Localidade}, nil
 }

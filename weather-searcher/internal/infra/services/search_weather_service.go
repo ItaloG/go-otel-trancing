@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"github.com/rainycape/unidecode"
 )
 
 type WeatherApiResponse struct {
@@ -77,6 +78,9 @@ func (sw *SearchWeatherService) Search(ctx context.Context, location string, OTE
 	startTime := time.Now()
 
 	formattedLocation := strings.Replace(location, " ", "_", -1)
+	formattedLocation = unidecode.Unidecode(formattedLocation)
+
+	OTELSpan.SetAttributes(attribute.String("HTTP Request", sw.ClientUrl+formattedLocation+"&key="+sw.WeatherToken))
 
 	req, err := http.NewRequestWithContext(ctx, "GET", sw.ClientUrl+formattedLocation+"&key="+sw.WeatherToken, nil)
 	if err != nil {
@@ -112,6 +116,12 @@ func (sw *SearchWeatherService) Search(ctx context.Context, location string, OTE
 
 	requestDuration := time.Since(startTime)
 	span.SetAttributes(attribute.Float64("weather API request duration", requestDuration.Seconds()))
+
+	weatherapiResponse, err:= json.Marshal(weatherResponse)
+	if err != nil {
+		return nil, err
+	}
+	OTELSpan.SetAttributes(attribute.String("HTTP Responses", string(weatherapiResponse)))
 
 	return &services_protocols.Weather{
 		TempC: float64(weatherResponse.Current.TempC),
